@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <title>Forum</title>
+    <script language="Javascript" type="text/javascript" src="edit_area/edit_area_full.js"></script>
+	<script language="Javascript" type="text/javascript">
+		// initialisation
+		editAreaLoader.init({
+			id: "main"	// id of the textarea to transform		
+			,start_highlight: true	// if start with highlight
+			,allow_resize: "both"
+			,allow_toggle: false
+			,word_wrap: true
+			,language: "en"
+			,syntax: "php"
+      ,toolbar:''	
+		});
+
+    function editAreaLoaded(id){
+			if(id=="main")
+			{
+				open_file1();
+				open_file2();
+			}
+		}
+		
+		function open_file1()
+		{
+			var new_file= {id: "to\\ é # € to", text: "$authors= array();\n$news= array();", syntax: 'php', title: 'beautiful title'};
+			editAreaLoader.openFile('example_2', new_file);
+		}
+    </script>
+</head>
+<body onload="updateBoard();">
+
+<div class="ui grid" style="margin-top:20px;">
+<div class="ui comments" id="commentsDiv" style="margin:20px;padding-left:10%;padding-top:20px;">
+  <div id="innerComments">
+  <h3 class="ui dividing header">Comments</h3>
+  <div class="comment">
+    <a class="avatar">
+      <img src="img/matt.jpg">
+    </a>
+    <div class="content">
+      <b class="board_author">Matt</b>
+      <div class="metadata">
+        <span class="date">Three days ago</span>
+      </div>
+      <div class="text">
+        Welcome to this Message Board.
+      </div>
+      <div class="actions">
+        <a class="reply">Reply</a>
+      </div>
+    </div>
+  </div>
+  <div class="comment">
+    <a class="avatar">
+      <img src="img/elliot.jpg">
+    </a>
+    <div class="content">
+    <b class="board_author">Elliot Fu</b>
+      <div class="metadata">
+        <span class="date">Two days ago</span>
+      </div>
+      <div class="text">
+        <p>Hello, there!</p>
+      </div>
+      <div class="actions">
+        <a class="reply">Reply</a>
+      </div>
+    </div>
+    <div class="comments">
+      <div class="comment">
+        <a class="avatar">
+          <img src="img/jenny.jpg">
+        </a>
+        <div class="content">
+          <b class="board_author">Jenny Hess</b>
+          <div class="metadata">
+            <span class="date">Two days ago</span>
+          </div>
+          <div class="text">
+            Hi.
+          </div>
+          <div class="actions">
+            <a class="reply">Reply</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div id="outerComments">
+
+    </div>
+  </div>
+  <form class="ui reply form" id="form" action="sendmessage.php" method="post">
+    <div class="field">
+      <input name="message" id="messageInput" autocomplete="off">
+    </div>
+    <p id="error" style="color:red;"></p>
+    <input type="submit" value="Add Reply" class="ui primary button">
+  </form>
+</div>
+<div style="margin-top:50px">
+  <h2>Code:</h2>
+  <textarea id="main" style="padding-top:150px;height: 350px;" name="main">
+<?php
+  $message = $_POST["message"]; //Get Message from POST Parameter
+  session_start(); //Start the sesson
+  array_push($_SESSION["messages"], $message); //Add the Message to the Session array
+?></textarea>
+</div>
+</div>
+
+<script>
+  function updateBoard() {
+    $.ajax({url: "getboard.php", method: "GET", success:function(data) {
+      let messages = data["messages"];
+      $("#outerComments").html("");
+      for(let i = 0;i<messages.length;i++) {
+        $("#outerComments").append("<div class='comment'><a class='avatar'><img src='img/joe.jpg'></a><div class='content'> <b class='board_author'>Joe Henderson</b><div class='metadata'><span class='date'>Just now</span></div><div class='text'>" + messages[i] + "</div><div class='actions'><a class='reply'>Reply</a></div></div></div>")
+      }
+    }});
+  }
+  $("#form").submit(function(e) {
+    e.preventDefault();
+    console.log(editAreaLoader.getValue('main'))
+    let data = {
+      "message" : $("#messageInput").val(),
+      "code" : editAreaLoader.getValue('main')
+    };
+    $.ajax({url: "sendmessage.php", method: "POST", data:data}).done(function(data) {
+      updateBoard();
+      $("#messageInput").focus();
+      $("#messageInput").val("");
+    }).fail(function (data) {
+       $("#error").text(data.responseText);
+    });
+  })
+</script>
+</body>
+</html>
