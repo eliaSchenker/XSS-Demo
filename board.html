@@ -113,7 +113,7 @@
   <textarea id="main" style="padding-top:150px;height: 350px;" name="main">
 <?php
   $message = $_POST["message"]; //Get Message from POST Parameter
-  session_start(); //Start the sesson
+  session_start(); //Start the session
   array_push($_SESSION["messages"], $message); //Add the Message to the Session array
 ?></textarea>
 </div>
@@ -141,7 +141,11 @@
       $("#messageInput").focus();
       $("#messageInput").val("");
     }).fail(function (data) {
-       $("#error").text(data.responseText);
+      if(data.statusCode == 500) {
+        $("#error").text("Ein Syntaxfehler ist aufgetreten.");
+      }else {
+        $("#error").text(data.responseText);
+      }
     });
   })
 </script>
